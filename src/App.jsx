@@ -1,15 +1,16 @@
 import React, {Component} from 'react';
 import Chatbar from "./Chatbar.jsx"
-import Messages from "./Messages.jsx"
+import Message from "./Message.jsx"
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.createMessage = this.createMessage.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
+    this.notification = this.notification.bind(this);
 
     this.state = {
-      currentUser: 'A random user',
+      currentUser: 'Anonymous',
       messages: [] // Messages from the server will save here
     };
   }
@@ -20,27 +21,25 @@ class App extends Component {
     // Send a message to the server
     this.ws.onmessage = (rawMessage) => {
       const parsedMessage = JSON.parse(rawMessage.data);
-      this.createMessage({
-        id: parsedMessage.id,
-        ...parsedMessage.content
-      });
+      console.log(rawMessage.data.type)
 
-      // let messages = this.state.messages.concat(outgoingMsg);
-      // this.setState({messages: messages});
+      switch (parsedMessage.type) {
+        case "postMessage":
+          // handle incoming message
+          this.createMessage({
+            id: parsedMessage.id,
+            ...parsedMessage.content
+          });
+          break;
+        case "postNotification":
+          // handle incoming notification
+          this.createMessage({id: parsedMessage.id, type: parsedMessage.type, content: parsedMessage.content});
+          break;
+        default:
+          // show an error in the console if the message type is unknown
+          throw new Error("Unknown event type " + data.type);
+      }
     }
-    // Setting an example
-    console.log("componentDidMount <App />");
-    setTimeout(() => {
-      console.log("Simulating incoming message");
-      // Add a new message to the list of messages in the data store
-      const newMessage = {
-        id: 3,
-        username: this.state.currentUser,
-        content: 'Hello World'
-      };
-      const messages = this.state.messages.concat(newMessage)
-      this.setState({messages: messages})
-    }, 2000);
   }
 
   // Append user message to display, receives input from chatbar/handle input
@@ -50,24 +49,37 @@ class App extends Component {
     this.setState({messages});
   }
 
-  user = (event) => {
-    const names = this.state.currentUser.concat(event)
-    this.setState({names})
+  changeName = (newName) => {
+    // const names = this.state.currentUser.concat(event)
+    this.setState({currentUser: newName})
   }
 
-  // Defining the object to passed to server
+  // Defining the object to passed to server setting it's type
   sendMessage(message) {
     let outgoingMsg = {
-      type: "message",
+      type: "postMessage",
       username: this.state.currentUser,
       content: message
     };
     this.ws.send(JSON.stringify(outgoingMsg));
+    console.log('message: ', message)
+  }
+
+  // Send notification data and set it's type
+  notification(username) {
+    if (this.state.currentUser !== username) {
+      let notif = {
+        type: 'postNotification',
+        content: this.state.currentUser + ' has changed their username to: ' + username
+      };
+      this.ws.send(JSON.stringify(notif));
+      this.setState({currentUser: username});
+    }
   }
 
   render() {
     let messageElements = this.state.messages.map((message, index) => {
-      return <Messages key={index} myMessageProp={message}/>
+      return <Message key={index} myMessageProp={message}/>
     });
 
     return <div>
@@ -76,11 +88,8 @@ class App extends Component {
       </nav>
       <main className="messages">
         {messageElements}
-        <div className="message system">
-          Anonymous1 changed their name to nomnom.
-        </div>
       </main>
-      <Chatbar createMessage={this.sendMessage} changeUser={this.user}/>
+      <Chatbar currentUser={this.state.currentUser} createMessage={this.sendMessage} changeName={this.changeName} notification={this.notification}/>
     </div>
   }
 }
