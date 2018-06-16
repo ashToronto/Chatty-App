@@ -30,3 +30,7 @@ Install the dependencies and start the server.
 npm install
 npm start
 open http://localhost:3000
+
+## Final Product
+
+!["3 active users in a Chat Room"](https://github.com/ashToronto/Chatty-App/blob/master/docs/Screen%20Shot%202018-06-16%20at%2010.11.09%20AM.png?raw=true)
