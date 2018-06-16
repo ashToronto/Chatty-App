@@ -11,7 +11,8 @@ class App extends Component {
 
     this.state = {
       currentUser: 'Anonymous',
-      messages: [] // Messages from the server will save here
+      messages: [], // Messages from the server will save here
+      userCount: 1
     };
   }
   // Is similar to doccument.ready Only occurs once, does not repeat
@@ -21,13 +22,15 @@ class App extends Component {
     // Send a message to the server
     this.ws.onmessage = (rawMessage) => {
       const parsedMessage = JSON.parse(rawMessage.data);
-      console.log(rawMessage.data.type)
-
+      console.log(parsedMessage)
+      // Segragates data based on if it is a: notif; message
+      // Also adds user count
       switch (parsedMessage.type) {
         case "postMessage":
           // handle incoming message
           this.createMessage({
             id: parsedMessage.id,
+            type: 'postMessage',
             ...parsedMessage.content
           });
           break;
@@ -35,9 +38,8 @@ class App extends Component {
           // handle incoming notification
           this.createMessage({id: parsedMessage.id, type: parsedMessage.type, content: parsedMessage.content});
           break;
-        default:
-          // show an error in the console if the message type is unknown
-          throw new Error("Unknown event type " + data.type);
+        case "clientSize":
+        this.setState({userCount: parsedMessage.clientSize})
       }
     }
   }
@@ -84,7 +86,8 @@ class App extends Component {
 
     return <div>
       <nav className="navbar">
-        <a href="/" className="navbar-brand">Chatty</a>
+        <a href="/" className="navbar-brand">The Chatter Box</a>
+        <p className = "userCount">Online: {this.state.userCount}</p>
       </nav>
       <main className="messages">
         {messageElements}
