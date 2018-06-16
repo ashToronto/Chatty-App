@@ -1,18 +1,8 @@
-React Boilerplate
+An online chatting room
 =====================
 
-A minimal and light dev environment for ReactJS.
+A web app that uses ReactJS and web-soccets to connect multiple browsers togather in a chat room. Users can send real-time messages between one another and change. A counter will indicate the number of real-time users who are active. 
 
-### Usage
-
-Clone the boilerplate and create your own git repo.
-
-```
-git clone git@github.com:lighthouse-labs/react-simple-boilerplate.git
-cd react-simple-boilerplate
-git remote rm origin
-git remote add origin [YOUR NEW REPOSITORY]
-# Manually update your package.json file
 ```
 
 Install the dependencies and start the server.
@@ -26,7 +16,7 @@ open http://localhost:3000
 npm run lint
 ```
 
-### Development Dependencies
+## Development Dependencies
 
 * babel-core
 * babel-loader
